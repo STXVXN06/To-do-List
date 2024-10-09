@@ -1,0 +1,39 @@
+name: Pylint Check
+
+on:
+  push:
+    branches:
+      - "**" # Se ejecuta en todas las ramas
+  pull_request:
+    branches:
+      - "**" # Se ejecuta en pull requests desde todas las ramas
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies from requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ${{ github.workspace }}/FastAPI/requirements.txt
+
+      - name: Run Pylint on the whole project
+        run: |
+          pylint ./**/*.py
+
+      - name: Analysing the code with pylint
+        run: |
+          if [ ${{ steps.rate.outputs.rate }} -gt 9 ]; then
+            pylint $(git ls-files '*.py')
+          else
+            echo "Rate is not greater than 9. Skipping pylint analysis."
+          fi

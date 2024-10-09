@@ -1,0 +1,47 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  Deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build & Deploy
+      env:
+        PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        HOST_NAME: ${{ secrets.SSH_HOST }}
+        USER_NAME: ${{ secrets.USER_NAME }}
+
+      run: |
+        # Guardamos la llave privada y le asignamos los permisos correctos
+        echo "$PRIVATE_KEY" > private_key.pem && chmod 400 private_key.pem
+
+        # Nos conectamos a la instancia EC2 usando SSH
+        ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER_NAME}@${HOST_NAME} '
+
+        # Verificamos si el directorio es un repositorio Git
+        if [ ! -d "/home/ubuntu/prod-to-do-list/.git" ]; then
+          # Si no es un repositorio Git, clonamos el repositorio
+          git clone https://github.com/STXVXN06/To-do-List.git /home/ubuntu/prod-to-do-list;
+        fi
+
+        # Comandos para desplegar el contenedor de Docker
+        cd /home/ubuntu/prod-to-do-list &&
+
+        # Actualizamos el repositorio
+        git checkout main &&
+        git fetch --all &&
+        git reset --hard origin/main &&
+        git pull origin main &&
+
+        # Construimos y ejecutamos el contenedor de Docker
+        docker compose down &&
+        docker compose build &&
+        docker compose up -d
+        '

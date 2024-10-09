@@ -1,0 +1,53 @@
+services:
+  db:
+    build: 
+      context: ./MySQL
+      dockerfile: Dockerfile
+    container_name: database
+    restart: always
+    ports:
+      - 3306:3306
+    volumes:
+      - ./MySQL/volumes:/var/lib/mysql
+    hostname: to-do-list-database
+    networks:
+      - net_to-do-list
+    healthcheck:
+        test: ["CMD","mysql", "-u", "user", "-proot"]
+        interval: 30s
+        timeout: 5s
+        retries: 5
+# --------------------------------------------------------------------
+  # - The adminer is a tool for managing content in databases.
+  adminer:
+    image: adminer
+    container_name: adminer-to-do-list
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - net_to-do-list
+# --------------------------------------------------------------------
+  # - fastapi refers to the container where the application backend will be stored.
+  fastapi:
+    build: 
+      context: ./FastAPI
+      dockerfile: Dockerfile
+    container_name: backend
+    restart: always
+    volumes:
+      - ./FastAPI/app:/app 
+    ports:
+      - "8000:8000"
+    command: uvicorn main:app --reload --host 0.0.0.0 --port 80  # Recarga automática con --reload
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - net_to-do-list
+# --------------------------------------------------------------------
+
+networks:
+  net_to-do-list:
+      driver: bridge
+      name: net_to-do-list
