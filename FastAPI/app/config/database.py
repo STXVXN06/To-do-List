@@ -9,7 +9,7 @@ Necessary imports to define data models using Peewee ORM.
 """
 from datetime import date
 from dotenv import load_dotenv
-from settings import DATABASE
+from settings import DATABASE #pylint: disable=import-error
 from peewee import (
     MySQLDatabase, Model, CharField, TextField, DateField,
     ForeignKeyField, BooleanField, TimestampField, Check, AutoField, fn, SQL
