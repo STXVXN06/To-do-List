@@ -1,27 +1,41 @@
 """
-This module defines the Role class, which represents a role model used to manage 
-different roles or permissions within an application.
-
-The Role class includes attributes such as the role's unique identifier and name.
-
-It is built using Pydantic's `BaseModel` to ensure data validation and type checking.
+role.py
 """
+from typing import Optional  # Standard library import
+from pydantic import BaseModel  # Third-party import
 
-from pydantic import BaseModel
-
-
-class Role(BaseModel):
+class RoleBase(BaseModel):  # pylint: disable=too-few-public-methods
     """
-    Represents a role with relevant details.
+    Base class for representing a role.
+    """
 
-    Attributes:
-    -----------
-    id : int
-        Unique identifier for the role.
-    name : str
-        The name of the role (e.g., 'admin', 'user', 'moderator'),
-        representing the permissions associated with it.
+    name: str
+
+
+class RoleCreate(RoleBase):  # pylint: disable=too-few-public-methods
+    """
+    Class for creating a new role.
+    """
+
+
+class RoleUpdate(BaseModel):  # pylint: disable=too-few-public-methods
+    """
+    Class for updating an existing role.
+    """
+
+    name: Optional[str] = None
+
+
+class RoleRead(RoleBase):  # pylint: disable=too-few-public-methods
+    """
+    Class for representing a role read from the database.
     """
 
     id: int
-    name: str
+
+    class Config:  # pylint: disable=too-few-public-methods
+        """
+        Pydantic configuration settings.
+        """
+
+        orm_mode = True
