@@ -1,37 +1,59 @@
 """
-This module defines the User class, which represents a user model for managing 
-user-related data and authentication within an application.
-
-The User class includes attributes for user credentials, an associated role 
-(which is a reference to the Role model), and other relevant user information.
-
-It is built using Pydantic's `BaseModel` to enable data validation and type checking.
+This module defines the User Pydantic models for data validation and serialization.
 """
 
-from pydantic import BaseModel
-from .role import Role  # pylint: disable=relative-beyond-top-level
+from typing import Optional  # Standard library import
+from pydantic import BaseModel, EmailStr  # Third-party import
+from .role import RoleRead  # pylint: disable=E0402
 
 
-class User(BaseModel):
+class UserCreate(BaseModel):
     """
-    Represents a user with their credentials and associated role.
+    Model for creating a new user.
 
     Attributes:
-    -----------
-    id : int
-        Unique identifier for the user.
-    email : str
-        The user's email address, used as their login.
-    password : str
-        The user's hashed password for authentication.
-    role_id : int
-        Identifier for the role associated with the user.
-    role : Role
-        The role object, representing the user's permissions and access levels.
+        email (EmailStr): The user's email address.
+        password (str): The user's password.
+        role_id (int): The ID of the role assigned to the user.
+    """
+
+    email: EmailStr
+    password: str
+    role_id: int
+
+
+class UserUpdate(BaseModel):
+    """
+    Model for updating an existing user.
+
+    Attributes:
+        email (Optional[EmailStr]): The new email address.
+        password (Optional[str]): The new password.
+        role_id (Optional[int]): The new role ID.
+    """
+
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+    role_id: Optional[int] = None
+
+
+class UserRead(BaseModel):  # pylint: disable=R0903
+    """
+    Model for reading user information.
+
+    Attributes:
+        id (int): The unique identifier of the user.
+        email (EmailStr): The user's email address.
+        role (RoleRead): The role assigned to the user.
     """
 
     id: int
-    email: str
-    password: str
-    role_id: int
-    role: Role
+    email: EmailStr
+    role: RoleRead
+
+    class Config:  # pylint: disable=too-few-public-methods
+        """
+        class Config
+        """
+
+        orm_mode = True
