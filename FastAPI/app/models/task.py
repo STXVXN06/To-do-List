@@ -9,7 +9,9 @@ It is based on the Pydantic `BaseModel` to ensure data validation and type check
 """
 
 from datetime import date
+from typing import List, Optional
 from pydantic import BaseModel
+from .change import Change
 
 
 class Task(BaseModel):
@@ -45,3 +47,14 @@ class Task(BaseModel):
     status_id: int
     user_id: int
     is_favorite: bool
+    changes: Optional[List[Change]] = None
+
+class TaskUpdate(BaseModel):
+    """
+    This is so that the task can be updated.
+    """
+    title: Optional[str] = None
+    description: Optional[str] = None
+    expiration_date: Optional[date] = None
+    status_id: Optional[int] = None
+    is_favorite: Optional[bool] = None
