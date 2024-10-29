@@ -29,3 +29,6 @@ starlette==0.38.6
 tomlkit==0.13.2
 typing_extensions==4.12.2
 uvicorn==0.31.0
+
+passlib==1.7.4
+python-jose==3.3.0
