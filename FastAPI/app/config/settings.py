@@ -1,7 +1,6 @@
 """
 This module loads the environment configuration for the application.
-
-Uses dotenv to load environment variables from a .env file.  
+Uses `dotenv` to load environment variables from a `.env` file.  
 Defines the database configuration based on the application's environment.
 
 Variables:
