@@ -60,7 +60,6 @@ class UserModel(Model):
     role = ForeignKeyField(RoleModel, backref='users', null=True, on_delete='SET NULL')
     is_active = BooleanField(default=True)
 
-
     class Meta:# pylint: disable=too-few-public-methods
         """Meta information for the User model."""
         table_name = "user"
