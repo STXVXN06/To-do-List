@@ -5,11 +5,11 @@ Main module for the FastAPI application.
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from starlette.responses import RedirectResponse
-from routes import user_router, task_router, user_management_router, auth_routes
+from routes import task_router, user_management_router, auth_routes
 
 # Routers
 
-from database import database as connection
+from config.database import database as connection
 
 
 @asynccontextmanager
@@ -48,6 +48,5 @@ async def docs():
 
 # Include routers for events and tickets
 app.include_router(auth_routes.router)
-app.include_router(user_router)
 app.include_router(task_router)
 app.include_router(user_management_router)
