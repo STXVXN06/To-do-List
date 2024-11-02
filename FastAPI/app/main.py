@@ -3,14 +3,12 @@ Main module for the FastAPI application.
 """
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
 from starlette.responses import RedirectResponse
+from config.database import database as connection
+from fastapi import FastAPI
+
 
 # Routers
-
-
-from database import database as connection
-
 
 @asynccontextmanager
 async def lifespan(api: FastAPI):  # pylint: disable=unused-argument

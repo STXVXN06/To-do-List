@@ -9,7 +9,7 @@ Necessary imports to define data models using Peewee ORM.
 """
 from datetime import date
 from dotenv import load_dotenv
-from settings import DATABASE #pylint: disable=import-error
+from config.settings import DATABASE
 from peewee import (
     MySQLDatabase, Model, CharField, TextField, DateField,
     ForeignKeyField, BooleanField, TimestampField, Check, AutoField, fn, SQL
@@ -35,7 +35,7 @@ class RoleModel(Model):
     class Meta:# pylint: disable=too-few-public-methods
         """Meta information for the Role model."""
         table_name = "role"
-        doc = "Table that stores user roles."
+        database = DATABASE
 
 
 class StatusModel(Model):
@@ -49,7 +49,7 @@ class StatusModel(Model):
     class Meta:# pylint: disable=too-few-public-methods
         """Meta information for the Status model."""
         table_name = "status"
-        doc = "Table that defines the different states for tasks."
+        database = DATABASE
 
 
 class UserModel(Model):
@@ -62,7 +62,7 @@ class UserModel(Model):
     class Meta:# pylint: disable=too-few-public-methods
         """Meta information for the User model."""
         table_name = "user"
-        doc = "Table that stores user information."
+        database = DATABASE
 
 
 class TaskModel(Model):
@@ -79,7 +79,7 @@ class TaskModel(Model):
     class Meta:# pylint: disable=too-few-public-methods
         """Meta information for the Task model."""
         table_name = "task"
-        doc = "Table that stores tasks and their associated information."
+        database = DATABASE
         constraints = [
             Check('expiration_date IS NULL OR expiration_date >= date_of_creation')
         ]
@@ -97,4 +97,4 @@ class ChangeModel(Model):
     class Meta:# pylint: disable=too-few-public-methods
         """Meta information for the Change model."""
         table_name = "change"
-        doc = "Table that logs changes made to tasks."
+        database = DATABASE

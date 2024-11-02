@@ -29,3 +29,6 @@ starlette==0.38.6
 tomlkit==0.13.2
 typing_extensions==4.12.2
 uvicorn==0.31.0
+cryptography==43.0.1
+mysql==0.0.3
+mysqlclient==2.2.4
