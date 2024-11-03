@@ -3,13 +3,13 @@ Main module for the FastAPI application.
 """
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
 from starlette.responses import RedirectResponse
 from routes import task_router, user_management_router, auth_routes
 
 # Routers
 
 from config.database import database as connection
+from fastapi import FastAPI
 
 
 @asynccontextmanager

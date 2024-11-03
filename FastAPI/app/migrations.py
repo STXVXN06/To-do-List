@@ -26,7 +26,7 @@ class Role(Base):# pylint: disable=too-few-public-methods
     """Role table for storing user roles."""
     __tablename__ = "role"
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
+    name = Column(String(50),nullable=False)
 
 
 
@@ -35,8 +35,11 @@ class Status(Base):# pylint: disable=too-few-public-methods
     """Status table defining the various states for tasks."""
     __tablename__ = "status"
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False,
-                  check=CheckConstraint("name IN ('TO_DO', 'IN_PROGRESS', 'COMPLETED')"))
+    name = Column(String(255), nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("name IN ('TO_DO', 'IN_PROGRESS', 'COMPLETED')", name="check_status_name"),
+    )
 
 
 class User(Base):# pylint: disable=too-few-public-methods
@@ -53,7 +56,7 @@ class Task(Base): # pylint: disable=too-few-public-methods
     """Task table for storing tasks with relationships to users and statuses."""
     __tablename__ = "task"
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, nullable=False)
+    title = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
     date_of_creation = Column(Date, nullable=False)
     expiration_date = Column(Date, nullable=True)
@@ -78,7 +81,7 @@ class Change(Base):# pylint: disable=too-few-public-methods
     id = Column(Integer, primary_key=True, index=True)
     task_id = Column(Integer, ForeignKey('task.id'), nullable=False)
     timestamp = Column(Date, nullable=False)
-    field_changed = Column(String, nullable=False)
+    field_changed = Column(String(100), nullable=False)
     old_value = Column(Text, nullable=True)
     new_value = Column(Text, nullable=True)
 

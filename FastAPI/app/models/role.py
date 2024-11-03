@@ -19,7 +19,7 @@ class Role(BaseModel):
     id : int
         Unique identifier for the role.
     name : str
-        The name of the role (e.g., 'admin', 'user', 'moderator'),
+        The name of the role (e.g., 'admin', 'user'),
         representing the permissions associated with it.
     """
 
