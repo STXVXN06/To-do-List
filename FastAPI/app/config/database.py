@@ -35,7 +35,7 @@ class RoleModel(Model):
     class Meta:# pylint: disable=too-few-public-methods
         """Meta information for the Role model."""
         table_name = "role"
-        database = DATABASE
+        database = database
 
 
 class StatusModel(Model):
@@ -49,7 +49,7 @@ class StatusModel(Model):
     class Meta:# pylint: disable=too-few-public-methods
         """Meta information for the Status model."""
         table_name = "status"
-        database = DATABASE
+        database = database
 
 
 class UserModel(Model):
@@ -63,7 +63,7 @@ class UserModel(Model):
     class Meta:# pylint: disable=too-few-public-methods
         """Meta information for the User model."""
         table_name = "user"
-        database = DATABASE
+        database = database
 
 
 class TaskModel(Model):
@@ -80,7 +80,7 @@ class TaskModel(Model):
     class Meta:# pylint: disable=too-few-public-methods
         """Meta information for the Task model."""
         table_name = "task"
-        database = DATABASE
+        database = database
         constraints = [
             Check('expiration_date IS NULL OR expiration_date >= date_of_creation')
         ]
@@ -98,4 +98,4 @@ class ChangeModel(Model):
     class Meta:# pylint: disable=too-few-public-methods
         """Meta information for the Change model."""
         table_name = "change"
-        database = DATABASE
+        database = database

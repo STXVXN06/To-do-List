@@ -1,8 +1,5 @@
-"""
-    Represents a user with its credentials and associated role.
-"""
 from typing import Optional
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field  # Añade Field aquí
 from .role import Role
 
 class User(BaseModel):
@@ -11,15 +8,20 @@ class User(BaseModel):
     """
     id: int
     email: EmailStr
+<<<<<<< HEAD
     role_id: int
+=======
+    role_id: int = Field(alias='role')
+    hashed_password: Optional[str] = Field(alias='password')
+>>>>>>> f7feea7 (corrigiendo tokens y gestion de usuarios)
     is_active: bool
     role: Role
 
-    class Config: # pylint: disable=too-few-public-methods
+    class Config:  # pylint: disable=too-few-public-methods
         """
         Model config.
         """
-        orm_mode = True
+        from_attributes = True
 
 class UserCreate(BaseModel):
     """

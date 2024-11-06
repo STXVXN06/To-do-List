@@ -49,7 +49,7 @@ class User(Base):# pylint: disable=too-few-public-methods
     email = Column(String(100), unique=True, nullable=False)
     password = Column(String(255), nullable=False)
     role_id = Column(Integer, ForeignKey('role.id'), nullable=True)
-
+    is_active = Column(Boolean, default=True)
     role = relationship("Role", back_populates="users")
 
 class Task(Base): # pylint: disable=too-few-public-methods
