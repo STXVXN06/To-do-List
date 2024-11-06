@@ -6,7 +6,7 @@ services:
     container_name: database
     restart: always
     ports:
-      - 3306:3306
+      - 3307:3306
     volumes:
       - ./MySQL/volumes:/var/lib/mysql
     hostname: to-do-list-database
@@ -38,7 +38,7 @@ services:
     volumes:
       - ./FastAPI/app:/app 
     ports:
-      - "8000:8000"
+      - "8000:80"
     command: uvicorn main:app --reload --host 0.0.0.0 --port 80  # Recarga automática con --reload
     depends_on:
       db:
