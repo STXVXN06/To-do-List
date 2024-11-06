@@ -8,12 +8,8 @@ class User(BaseModel):
     """
     id: int
     email: EmailStr
-<<<<<<< HEAD
-    role_id: int
-=======
     role_id: int = Field(alias='role')
     hashed_password: Optional[str] = Field(alias='password')
->>>>>>> f7feea7 (corrigiendo tokens y gestion de usuarios)
     is_active: bool
     role: Role
 
