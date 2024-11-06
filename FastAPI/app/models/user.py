@@ -11,7 +11,6 @@ class User(BaseModel):
     """
     id: int
     email: EmailStr
-    hashed_password: str
     role_id: int
     is_active: bool
     role: Role
@@ -27,7 +26,7 @@ class UserCreate(BaseModel):
     Model for creating a new user.
     """
     email: EmailStr
-    password: str
+    password: str # Plaintext; hash before storing.
     role_id: int
 
 class UserUpdate(BaseModel):
