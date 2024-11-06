@@ -7,7 +7,7 @@ creating, reading, updating, and deleting tasks through a REST API.
 from datetime import date
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Depends, status
-from models.user import User
+from models.user import UserRead
 from models.task import Task, TaskUpdate
 from models.change import Change
 from services.task_service import TaskService
@@ -24,7 +24,7 @@ def create_task(
     description: Optional[str] = None,
     expiration_date: Optional[date] = None,
     status_id: int = 1,  # Default 'To Do'
-    current_user: User = Depends(get_current_user)
+    current_user: UserRead = Depends(get_current_user)  # Cambiado de User a UserRead
 ) -> Task:
     """
     Create a new task.
@@ -41,7 +41,7 @@ def create_task(
 @router.get("/{task_id}", response_model=Task)
 def get_task(
     task_id: int,
-    current_user: User = Depends(get_current_user)
+    current_user: UserRead = Depends(get_current_user)  # Cambiado de User a UserRead
 ) -> Task:
     """
     Get a task by its ID.
@@ -56,7 +56,7 @@ def get_task(
 def update_task(
     task_id: int,
     task_update: TaskUpdate,
-    current_user: User = Depends(get_current_user)
+    current_user: UserRead = Depends(get_current_user)  # Cambiado de User a UserRead
 ) -> Task:
     """Update an existing task."""
     is_admin = current_user.role.name == "Administrator"
@@ -73,7 +73,7 @@ def update_task(
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_task(
     task_id: int,
-    current_user: User = Depends(get_current_user)
+    current_user: UserRead = Depends(get_current_user)  # Cambiado de User a UserRead
 ):
     """
     Delete a task by its ID.
@@ -92,7 +92,7 @@ def delete_task(
 def list_tasks(
     task_status: Optional[str] = None,
     expiration_date: Optional[date] = None,
-    current_user: User = Depends(get_current_user)
+    current_user: UserRead = Depends(get_current_user)  # Cambiado de User a UserRead
 ) -> List[Task]:
     """
     List all tasks for the user with filtering options.
@@ -109,7 +109,7 @@ def list_tasks(
 @router.patch("/{task_id}/favorite", response_model=Task)
 def toggle_favorite(
     task_id: int,
-    current_user: User = Depends(get_current_user)
+    current_user: UserRead = Depends(get_current_user)  # Cambiado de User a UserRead
 ) -> Task:
     """
     Toggle the favorite status of a task.
@@ -127,7 +127,7 @@ def toggle_favorite(
 @router.get("/{task_id}/changes", response_model=List[Change])
 def get_task_changes(
     task_id: int,
-    current_user: User = Depends(get_current_user)
+    current_user: UserRead = Depends(get_current_user)  # Cambiado de User a UserRead
 ) -> List[Change]:
     """
     Get the change history of a specific task.

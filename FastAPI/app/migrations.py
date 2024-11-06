@@ -27,10 +27,6 @@ class Role(Base):# pylint: disable=too-few-public-methods
     __tablename__ = "role"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(50),nullable=False)
-    is_active = Column(Boolean, default=True)
-
-
-
 
 class Status(Base):# pylint: disable=too-few-public-methods
     """Status table defining the various states for tasks."""
@@ -41,7 +37,6 @@ class Status(Base):# pylint: disable=too-few-public-methods
     __table_args__ = (
         CheckConstraint("name IN ('TO_DO', 'IN_PROGRESS', 'COMPLETED')", name="check_status_name"),
     )
-
 
 class User(Base):  # pylint: disable=too-few-public-methods
     """User table for storing user information and their associated roles."""

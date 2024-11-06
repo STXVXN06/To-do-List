@@ -12,11 +12,10 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from config.settings import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from services.user_service import UserService
-from models.user import User
+from models.user import UserRead  # Asegúrate de importar UserRead correctamente
 
-# Configure passlib context for password hashing
+# Configurar passlib context para password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 class AuthService:
     """Authentication Service."""
@@ -24,41 +23,21 @@ class AuthService:
     @staticmethod
     def verify_password(plain_password: str, hashed_password: str) -> bool:
         """
-        Verifies if the plain text password matches the hashed password.
-
-        Args:
-            plain_password (str): Plain text password.
-            hashed_password (str): Hashed password.
-
-        Returns:
-            bool: True if they match, False otherwise.
+        Verifica si la contraseña plana coincide con la contraseña hasheada.
         """
         return pwd_context.verify(plain_password, hashed_password)
 
     @staticmethod
     def get_password_hash(password: str) -> str:
         """
-        Hashes a plain text password.
-
-        Args:
-            password (str): Plain text password.
-
-        Returns:
-            str: Hashed password.
+        Hashea una contraseña plana.
         """
         return pwd_context.hash(password)
 
     @staticmethod
-    def authenticate_user(email: str, password: str) -> Optional[User]:
+    def authenticate_user(email: str, password: str) -> Optional[UserRead]:
         """
-        Authenticates a user.
-
-        Args:
-            email (str): User's email.
-            password (str): User's password.
-
-        Returns:
-            Optional[User]: Authenticated user if credentials are valid, otherwise None.
+        Autentica a un usuario.
         """
         user = UserService.get_user_by_email(email)
         if not user:
@@ -72,14 +51,7 @@ class AuthService:
         data: dict, expires_delta: Optional[timedelta] = None
     ) -> str:
         """
-        Creates a JWT access token.
-
-        Args:
-            data (dict): Data to encode in the token.
-            expires_delta (Optional[timedelta]): Expiration time of the token.
-
-        Returns:
-            str: JWT token.
+        Crea un token de acceso JWT.
         """
         to_encode = data.copy()
         if expires_delta:
@@ -91,18 +63,9 @@ class AuthService:
         return encoded_jwt
 
     @staticmethod
-    def get_current_user(token: str) -> User:
+    def get_current_user(token: str) -> UserRead:
         """
-        Retrieves the current user from the JWT token.
-
-        Args:
-            token (str): JWT token.
-
-        Returns:
-            User: Authenticated user.
-
-        Raises:
-            HTTPException: If the token is invalid or the user does not exist.
+        Recupera el usuario actual desde el token JWT.
         """
         credentials_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
