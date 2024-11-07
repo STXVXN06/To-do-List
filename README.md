@@ -1,7 +1,9 @@
 
+---
+
 # 📝 TO DO LIST
 
-This project aims to develop a task management application where users can create, edit, delete, and view tasks. The app includes authentication and role-based access control (RBAC) to manage permissions and users.
+This project is a task management application where users can create, edit, delete, and view tasks. The app includes authentication and role-based access control (RBAC) to manage permissions and user roles.
 
 🔗 [**Trello Board**](https://trello.com/w/espaciodetrabajo21533214)
 
@@ -9,8 +11,8 @@ This project aims to develop a task management application where users can creat
 
 ### 🔐 User Authentication & Management
 - **User Registration and Login**: Users can register and log in with an email and password.
-- **JWT Authentication**: JSON Web Tokens (JWT) are used to manage session authentication.
-- **User Roles**: The roles "Regular User" and "Administrator" control access to different functions.
+- **JWT Authentication**: JSON Web Tokens (JWT) manage session authentication.
+- **User Roles**: The roles "Regular User" and "Administrator" control access to various functions.
 
 ### 📝 Task Management
 - **Create Tasks**: Users can create tasks with a title, description, due date, and status (to-do, in-progress, completed).
@@ -26,7 +28,7 @@ This project aims to develop a task management application where users can creat
 - **Change History**: A log of changes for each task (creation, edits, status changes).
 - **Favorite Tasks**: Users can mark tasks as "Favorites" to highlight them in their list.
 
-## ⚙️ Project Requirements
+## ⚙ Project Requirements
 
 ### 📌 Core Technologies
 - **Backend**: Python / FastAPI 
@@ -53,15 +55,55 @@ This project aims to develop a task management application where users can creat
    ```
 2. Navigate to the project directory:
    ```bash
-   cd FastApi
+   cd To-do-List
    ```
-3. Configure environment variables for the database and JWT.
-4. Install dependencies and run the server.
-5. 
-   For FastAPI:
+3. **Activate the virtual environment:**
+   ```bash
+   python -m venv venv
+   ```
+   Then, activate the environment:
+   ```bash
+   # Windows:
+   venv\Scripts\activate
+
+   # macOS/Linux:
+   source venv/bin/activate
+   ```
+4. Navigate to the app directory:
+   ```bash
+   cd FastAPI/app
+   ```
+5. Install project dependencies:
    ```bash
    pip install -r requirements.txt
-   uvicorn main:app --reload
+   ```
+6. Navigate back to the project root directory:
+   ```bash
+   cd ../..  # Goes two levels up
    ```
 
+7. Start the Docker containers:
+   ```bash
+   docker-compose up --build
+   ```
+8. Run database migrations:
+   ```bash
+   docker-compose exec fastapi alembic upgrade head
+   ```
+
+*IMPORTANT:* If the migration command fails for any reason, try running it with `sudo`:
+   ```bash
+   sudo docker-compose exec fastapi alembic upgrade head
+   ```
+Here's the final addition to the README with details on backend navigation, port information, and a recommendation to use Postman:
+
 ---
+
+## 🌐 Backend Navigation
+
+- **Database**: Accessible on port **8080**
+- **Swagger UI**: Accessible on port **8000** for API documentation and testing.
+
+You can explore and test all functionalities directly from the Swagger UI on port 8000. Alternatively, it’s recommended to use **Postman** for more detailed API testing and request management.
+
+--- 
