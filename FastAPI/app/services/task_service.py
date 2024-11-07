@@ -6,7 +6,7 @@ from datetime import date, datetime
 from typing import List, Optional
 from models.task import Task
 from models.change import Change
-
+from config.database import TaskModel 
 
 class TaskService:
     """
@@ -20,9 +20,9 @@ class TaskService:
         expiration_date: Optional[date],
         status_id: int,
         user_id: int,
-    ) -> Task:
+    ) -> TaskModel:  # Devuelve el modelo de la base de datos
         """Creates a new task."""
-        task = Task.create(
+        task = TaskModel.create(  # Asegúrate de usar el modelo ORM aquí
             title=title,
             description=description,
             expiration_date=expiration_date,
@@ -32,13 +32,13 @@ class TaskService:
         return task
 
     @staticmethod
-    def get_task_by_id(task_id: int, user_id: int, is_admin: bool) -> Optional[Task]:
+    def get_task_by_id(task_id: int, user_id: int, is_admin: bool) -> Optional[TaskModel]:
         """Retrieves a task by ID, checking user permissions."""
-        task = Task.get_or_none(Task.id == task_id)
+        task = TaskModel.get_or_none(TaskModel.id == task_id)  # Usa el modelo ORM aquí
         if task and (task.user_id == user_id or is_admin):
             return task
         return None
-
+    
     @staticmethod
     def update_task(
         task_id: int, user_id: int, is_admin: bool, **updates

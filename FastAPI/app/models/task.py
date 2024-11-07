@@ -49,6 +49,16 @@ class Task(BaseModel):
     is_favorite: bool
     changes: Optional[List[Change]] = None
 
+    class Config:
+        from_attributes = True  # Cambia 'orm_mode' a 'from_attributes' para Pydantic v2
+        
+class TaskCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    expiration_date: Optional[date] = None
+    status_id: int
+
+    
 class TaskUpdate(BaseModel):
     """
     This is so that the task can be updated.

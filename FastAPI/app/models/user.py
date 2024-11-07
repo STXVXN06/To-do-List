@@ -1,40 +1,23 @@
 from typing import Optional
-from pydantic import BaseModel, EmailStr, Field  # Añade Field aquí
+from pydantic import BaseModel, EmailStr
 from .role import Role
 
-class User(BaseModel):
-    """
-    Represents a user with their credentials and associated role.
-    """
+class UserRead(BaseModel):
     id: int
     email: EmailStr
-<<<<<<< HEAD
     role_id: int
-=======
-    role_id: int = Field(alias='role')
-    hashed_password: Optional[str] = Field(alias='password')
->>>>>>> f7feea7 (corrigiendo tokens y gestion de usuarios)
     is_active: bool
     role: Role
 
-    class Config:  # pylint: disable=too-few-public-methods
-        """
-        Model config.
-        """
+    class Config:
         from_attributes = True
 
 class UserCreate(BaseModel):
-    """
-    Model for creating a new user.
-    """
     email: EmailStr
-    password: str # Plaintext; hash before storing.
+    password: str  # Contraseña en texto plano; se hashea antes de almacenar
     role_id: int
 
 class UserUpdate(BaseModel):
-    """
-    Model for updating an existing user.
-    """
     email: Optional[EmailStr] = None
     password: Optional[str] = None
     role_id: Optional[int] = None

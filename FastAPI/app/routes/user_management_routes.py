@@ -6,7 +6,7 @@ creating, reading, updating, and deleting users through a REST API.
 """
 from typing import List
 from fastapi import APIRouter, HTTPException, Depends, status
-from models.user import User, UserCreate, UserUpdate
+from models.user import UserRead, UserCreate, UserUpdate
 from services.user_service import UserService
 from utils.dependencies import get_current_admin
 
@@ -16,25 +16,23 @@ router = APIRouter(
 )
 
 # Helper function to verify admin permissions
-def verify_admin(current_admin: User):
+def verify_admin(current_admin: UserRead):  # Cambiar tipo a UserRead
     """Verifies if the user is an administrator."""
     if current_admin.role.name != "Administrator":
         raise HTTPException(status_code=403, detail="Insufficient permissions")
 
-
-@router.get("/", response_model=List[User])
-def list_users() -> List[User]:
+@router.get("/", response_model=List[UserRead])
+def list_users() -> List[UserRead]:
     """List all registered users."""
     return UserService.list_all_users()
 
-
-@router.post("/", response_model=User, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 def create_user(
     user: UserCreate,
-    current_admin: User = Depends(get_current_admin)
-) -> User:
-    """Create a new user (for administrators only)."""
-    verify_admin(current_admin)
+    current_admin: UserRead = Depends(get_current_admin)  # Cambiar tipo a UserRead
+) -> UserRead:
+    # """Create a new user (for administrators only)."""
+    # verify_admin(current_admin)
 
     try:
         created_user = UserService.create_user(
@@ -46,12 +44,11 @@ def create_user(
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error creating user") from e
 
-
-@router.get("/{user_id}", response_model=User)
+@router.get("/{user_id}", response_model=UserRead)
 def get_user(
     user_id: int,
-    current_admin: User = Depends(get_current_admin)
-) -> User:
+    current_admin: UserRead = Depends(get_current_admin)  # Cambiar tipo a UserRead
+) -> UserRead:
     """Get user information by their ID (for administrators only)."""
     verify_admin(current_admin)
 
@@ -60,13 +57,12 @@ def get_user(
         return user
     raise HTTPException(status_code=404, detail="User not found")
 
-
-@router.put("/{user_id}", response_model=User)
+@router.put("/{user_id}", response_model=UserRead)
 def update_user(
     user_id: int,
     user_update: UserUpdate,
-    current_admin: User = Depends(get_current_admin)
-) -> User:
+    current_admin: UserRead = Depends(get_current_admin)  # Cambiar tipo a UserRead
+) -> UserRead:
     """Update existing user information (for administrators only)."""
     verify_admin(current_admin)
 
@@ -94,11 +90,10 @@ def update_user(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
-
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(
     user_id: int,
-    current_admin: User = Depends(get_current_admin)
+    current_admin: UserRead = Depends(get_current_admin)  # Cambiar tipo a UserRead
 ):
     """Deletes a user by their ID (admin only)."""
     verify_admin(current_admin)
@@ -108,11 +103,10 @@ def delete_user(
         return
     raise HTTPException(status_code=404, detail="User not found")
 
-
 @router.patch("/{user_id}/active")
 def toggle_user_active(
     user_id: int,
-    current_admin: User = Depends(get_current_admin)
+    current_admin: UserRead = Depends(get_current_admin)  # Cambiar tipo a UserRead
 ):
     """Activate or deactivate a user (for administrators only)."""
     verify_admin(current_admin)
@@ -122,5 +116,6 @@ def toggle_user_active(
         raise HTTPException(status_code=404, detail="User not found")
 
     user.is_active = not user.is_active
-    user.save()
+    # Ya que UserRead es de solo lectura, necesitas actualizar el modelo ORM directamente
+    UserService.update_user_status(user_id, user.is_active)
     return {"message": f"User {user_id} is now {'active' if user.is_active else 'inactive'}"}

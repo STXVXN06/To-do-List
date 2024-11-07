@@ -1,8 +1,8 @@
-"""initial migration
+"""first_migrations
 
-Revision ID: 962f771fae0a
+Revision ID: 905731c6a76a
 Revises: 
-Create Date: 2024-11-06 16:39:46.851564
+Create Date: 2024-11-06 18:26:01.991411
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '962f771fae0a'
+revision: str = '905731c6a76a'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -71,6 +71,28 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_change_id'), 'change', ['id'], unique=False)
     # ### end Alembic commands ###
+    op.execute("""
+    INSERT INTO status (name) 
+    VALUES ('TO_DO'), ('IN_PROGRESS'), ('COMPLETED');
+    """)
+    
+    # Insertar los roles por defecto
+    op.execute("""
+    INSERT INTO role (name) 
+    VALUES ('Administrator'), ('User');
+    """)
+
+
+def downgrade() -> None:
+    # Borrar los datos insertados durante la migración
+    op.execute("""
+    DELETE FROM status WHERE name IN ('TO_DO', 'IN_PROGRESS', 'COMPLETED');
+    """)
+
+    op.execute("""
+    DELETE FROM role WHERE name IN ('Administrator', 'User');
+    """)
+
 
 
 def downgrade() -> None:

@@ -28,9 +28,6 @@ class Role(Base):# pylint: disable=too-few-public-methods
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(50),nullable=False)
 
-
-
-
 class Status(Base):# pylint: disable=too-few-public-methods
     """Status table defining the various states for tasks."""
     __tablename__ = "status"
@@ -41,16 +38,16 @@ class Status(Base):# pylint: disable=too-few-public-methods
         CheckConstraint("name IN ('TO_DO', 'IN_PROGRESS', 'COMPLETED')", name="check_status_name"),
     )
 
-
-class User(Base):# pylint: disable=too-few-public-methods
+class User(Base):  # pylint: disable=too-few-public-methods
     """User table for storing user information and their associated roles."""
     __tablename__ = "user"
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(100), unique=True, nullable=False)
-    password = Column(String(255), nullable=False)
+    password = Column(String(255))  # Solo aquí se maneja hashed_password
     role_id = Column(Integer, ForeignKey('role.id'), nullable=True)
-    is_active = Column(Boolean, default=True)
     role = relationship("Role", back_populates="users")
+    is_active = Column(Boolean, default=True)
+
 
 class Task(Base): # pylint: disable=too-few-public-methods
     """Task table for storing tasks with relationships to users and statuses."""
