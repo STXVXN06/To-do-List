@@ -79,11 +79,12 @@ class TaskService:
         is_admin: bool,
     ) -> List[Task]:
         """Lists tasks, applying filters and checking user permissions."""
-        query = Task.select().where((Task.user_id == user_id) | (is_admin))
+        print(f'---------------------------USERID---->{user_id}')
+        query = TaskModel.select().where((TaskModel.user_id == user_id) | (is_admin))
         if status:
-            query = query.where(Task.status_id == status)
+            query = query.where(TaskModel.status_id == status)
         if expiration_date:
-            query = query.where(Task.expiration_date <= expiration_date)
+            query = query.where(TaskModel.expiration_date <= expiration_date)
         return list(query)
 
     @staticmethod
