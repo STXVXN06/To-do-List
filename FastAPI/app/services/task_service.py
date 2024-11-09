@@ -6,7 +6,7 @@ from datetime import date, datetime
 from typing import List, Optional
 from models.task import Task
 from models.change import Change
-from config.database import TaskModel 
+from config.database import TaskModel, ChangeModel
 
 class TaskService:
     """
@@ -44,7 +44,7 @@ class TaskService:
         task_id: int, user_id: int, is_admin: bool, **updates
     ) -> Optional[Task]:
         """Updates a task, logging changes, and checking user permissions."""
-        task = Task.get_or_none(Task.id == task_id)
+        task = TaskModel.get_or_none(TaskModel.id == task_id)
         if task and (task.user_id == user_id or is_admin):
             for key, value in updates.items():
                 setattr(task, key, value)
@@ -52,7 +52,7 @@ class TaskService:
 
             # Log changes to the change history
             for field, new_value in updates.items():
-                Change.create(
+                ChangeModel.create(
                     task=task,
                     timestamp=datetime.now(),
                     field_changed=field,
