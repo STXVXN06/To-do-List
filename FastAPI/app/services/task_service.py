@@ -54,7 +54,6 @@ class TaskService:
             for field, new_value in updates.items():
                 ChangeModel.create(
                     task=task,
-                    timestamp=datetime.now(),
                     field_changed=field,
                     old_value=getattr(task, field, None),
                     new_value=new_value,

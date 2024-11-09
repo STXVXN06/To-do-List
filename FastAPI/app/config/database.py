@@ -7,12 +7,12 @@ Necessary imports to define data models using Peewee ORM.
 - AutoField: Auto-incrementing field used as a primary key.
 - fn: Provides SQL functions like CURRENT_TIMESTAMP.
 """
-from datetime import date
+from datetime import date, datetime  # Importa datetime
 from dotenv import load_dotenv
 from config.settings import DATABASE
 from peewee import (
     MySQLDatabase, Model, CharField, TextField, DateField,
-    ForeignKeyField, BooleanField, TimestampField, Check, AutoField, fn, SQL
+    ForeignKeyField, BooleanField, DateTimeField, Check, AutoField, fn, SQL
 )
 
 # Load environment variables from the .env file
@@ -90,7 +90,7 @@ class ChangeModel(Model):
     """Change table to log modifications in Task."""
     id = AutoField(primary_key=True)
     task = ForeignKeyField(TaskModel, backref='changes', on_delete='CASCADE')
-    timestamp = TimestampField(default=fn.CURRENT_TIMESTAMP)
+    timestamp = DateTimeField(default=datetime.utcnow)
     field_changed = CharField(null=False)
     old_value = TextField(null=True)
     new_value = TextField(null=True)
