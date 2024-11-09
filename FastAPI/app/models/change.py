@@ -30,4 +30,4 @@ class Change(BaseModel):
         """
         Model Config
         """
-        orm_mode = True
+        from_attributes = True

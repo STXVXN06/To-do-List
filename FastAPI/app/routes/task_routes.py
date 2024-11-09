@@ -134,4 +134,4 @@ def get_task_changes(
         raise HTTPException(status_code=404, detail="Task not found")
 
     changes = TaskService.get_changes_by_task_id(task_id)
-    return [Change.from_orm(change) for change in changes]
+    return changes
