@@ -99,7 +99,7 @@ class TaskService:
     def get_changes_by_task_id(task_id: int) -> List[Change]:
         """Retrieves changes for a specific task."""
         return list(
-            Change.select()
-            .where(Change.task == task_id)
-            .order_by(Change.timestamp.desc())
+            ChangeModel.select()
+            .where(ChangeModel.task == task_id)
+            .order_by(ChangeModel.timestamp.desc())
         )
