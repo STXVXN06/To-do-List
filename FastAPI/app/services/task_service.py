@@ -79,7 +79,6 @@ class TaskService:
         is_admin: bool,
     ) -> List[Task]:
         """Lists tasks, applying filters and checking user permissions."""
-        print(f'---------------------------USERID---->{user_id}')
         query = TaskModel.select().where((TaskModel.user_id == user_id) | (is_admin))
         if status:
             query = query.where(TaskModel.status_id == status)
