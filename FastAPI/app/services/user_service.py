@@ -158,11 +158,5 @@ class UserService:
         """
         Obtener una lista de todos los usuarios.
         """
-        users = UserModel.select()
-        user_list = []
-        for user_instance in users:
-            user_data = user_instance.__data__.copy()
-            user_data['role_id'] = user_instance.role.id
-            user_data['role'] = user_instance.role
-            user_list.append(UserRead.model_validate(user_data))
-        return user_list
+        users = UserModel.select().where(UserModel.role == 2)
+        return users
