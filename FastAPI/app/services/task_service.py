@@ -65,7 +65,7 @@ class TaskService:
     @staticmethod
     def delete_task(task_id: int, user_id: int, is_admin: bool) -> bool:
         """Deletes a task, checking user permissions."""
-        task = Task.get_or_none(Task.id == task_id)
+        task = TaskModel.get_or_none(TaskModel.id == task_id)
         if task and (task.user_id == user_id or is_admin):
             task.delete_instance()
             return True
