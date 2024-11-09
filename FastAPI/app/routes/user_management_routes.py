@@ -32,7 +32,7 @@ def create_user(
     current_admin: UserRead = Depends(get_current_admin)  # Cambiar tipo a UserRead
 ) -> UserRead:
     # """Create a new user (for administrators only)."""
-    # verify_admin(current_admin)
+    verify_admin(current_admin)
 
     try:
         created_user = UserService.create_user(
