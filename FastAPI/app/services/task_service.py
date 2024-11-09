@@ -6,7 +6,7 @@ from datetime import date, datetime
 from typing import List, Optional
 from models.task import Task
 from models.change import Change
-
+from config.database import TaskModel, ChangeModel
 
 class TaskService:
     """
@@ -20,9 +20,9 @@ class TaskService:
         expiration_date: Optional[date],
         status_id: int,
         user_id: int,
-    ) -> Task:
+    ) -> TaskModel:  # Devuelve el modelo de la base de datos
         """Creates a new task."""
-        task = Task.create(
+        task = TaskModel.create(  # Asegúrate de usar el modelo ORM aquí
             title=title,
             description=description,
             expiration_date=expiration_date,
@@ -32,19 +32,19 @@ class TaskService:
         return task
 
     @staticmethod
-    def get_task_by_id(task_id: int, user_id: int, is_admin: bool) -> Optional[Task]:
+    def get_task_by_id(task_id: int, user_id: int, is_admin: bool) -> Optional[TaskModel]:
         """Retrieves a task by ID, checking user permissions."""
-        task = Task.get_or_none(Task.id == task_id)
+        task = TaskModel.get_or_none(TaskModel.id == task_id)  # Usa el modelo ORM aquí
         if task and (task.user_id == user_id or is_admin):
             return task
         return None
-
+    
     @staticmethod
     def update_task(
         task_id: int, user_id: int, is_admin: bool, **updates
     ) -> Optional[Task]:
         """Updates a task, logging changes, and checking user permissions."""
-        task = Task.get_or_none(Task.id == task_id)
+        task = TaskModel.get_or_none(TaskModel.id == task_id)
         if task and (task.user_id == user_id or is_admin):
             for key, value in updates.items():
                 setattr(task, key, value)
@@ -52,9 +52,8 @@ class TaskService:
 
             # Log changes to the change history
             for field, new_value in updates.items():
-                Change.create(
+                ChangeModel.create(
                     task=task,
-                    timestamp=datetime.now(),
                     field_changed=field,
                     old_value=getattr(task, field, None),
                     new_value=new_value,
@@ -65,7 +64,7 @@ class TaskService:
     @staticmethod
     def delete_task(task_id: int, user_id: int, is_admin: bool) -> bool:
         """Deletes a task, checking user permissions."""
-        task = Task.get_or_none(Task.id == task_id)
+        task = TaskModel.get_or_none(TaskModel.id == task_id)
         if task and (task.user_id == user_id or is_admin):
             task.delete_instance()
             return True
@@ -79,11 +78,11 @@ class TaskService:
         is_admin: bool,
     ) -> List[Task]:
         """Lists tasks, applying filters and checking user permissions."""
-        query = Task.select().where((Task.user_id == user_id) | (is_admin))
+        query = TaskModel.select().where((TaskModel.user_id == user_id) | (is_admin))
         if status:
-            query = query.where(Task.status_id == status)
+            query = query.where(TaskModel.status_id == status)
         if expiration_date:
-            query = query.where(Task.expiration_date <= expiration_date)
+            query = query.where(TaskModel.expiration_date <= expiration_date)
         return list(query)
 
     @staticmethod

@@ -39,11 +39,30 @@ class UserService:
             raise ValueError(f"Role with id {role_id} not found") from exc
 
     @staticmethod
+<<<<<<< HEAD
     def get_user_by_email(email: str) -> Optional[UserRead]:
         """
         Obtener un usuario por su email.
         """
         try:
+=======
+    def get_user_by_email_login(email: str) -> Optional[UserModel]:
+        """
+        Recupera el usuario completo desde la base de datos por su email.
+        """
+        try:
+            return UserModel.get(UserModel.email == email)
+        except UserModel.DoesNotExist:
+            return None
+
+
+    @staticmethod
+    def get_user_by_email(email: str) -> Optional[UserRead]:
+        """
+        Obtener un usuario por su email.
+        """
+        try:
+>>>>>>> origin/test/juanma
             user_instance = UserModel.get(UserModel.email == email)
             user_data = user_instance.__data__.copy()
             user_data['role_id'] = user_instance.role.id  # Añadir role_id explícitamente
@@ -147,6 +166,7 @@ class UserService:
         """
         Obtener una lista de todos los usuarios.
         """
+<<<<<<< HEAD
         users = UserModel.select()
         user_list = []
         for user_instance in users:
@@ -155,3 +175,7 @@ class UserService:
             user_data['role'] = user_instance.role
             user_list.append(UserRead.model_validate(user_data))
         return user_list
+=======
+        users = UserModel.select().where(UserModel.role == 2)
+        return users
+>>>>>>> origin/test/juanma

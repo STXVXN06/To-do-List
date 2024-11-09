@@ -13,14 +13,21 @@ from passlib.context import CryptContext
 from config.settings import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from services.user_service import UserService
 from models.user import UserRead  # Asegúrate de importar UserRead correctamente
+<<<<<<< HEAD
 
 # Configurar passlib context para password hashing
+=======
+from config.database import UserModel
+# Configurar passlib context para password hashing
+
+>>>>>>> origin/test/juanma
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class AuthService:
     """Authentication Service."""
 
     @staticmethod
+<<<<<<< HEAD
     def verify_password(plain_password: str, hashed_password: str) -> bool:
         """
         Verifica si la contraseña plana coincide con la contraseña hasheada.
@@ -38,11 +45,24 @@ class AuthService:
     def authenticate_user(email: str, password: str) -> Optional[UserRead]:
         """
         Autentica a un usuario.
+=======
+    def verify_password(plain_password: str, password: str) -> bool:
+        """Verifica si la contraseña en texto plano coincide con la contraseña hasheada."""
+        return pwd_context.verify(plain_password, password)
+
+    @staticmethod
+    def get_password_hash(password: str) -> str:
+        """Hashea una contraseña en texto plano antes de almacenarla."""
+        return pwd_context.hash(password)
+
+    @staticmethod
+    def authenticate_user(email: str, password: str) -> Optional[UserModel]:
         """
-        user = UserService.get_user_by_email(email)
-        if not user:
-            return None
-        if not AuthService.verify_password(password, user.hashed_password):
+        Autentica a un usuario utilizando su email y contraseña.
+>>>>>>> origin/test/juanma
+        """
+        user = UserService.get_user_by_email_login(email)
+        if not user or not AuthService.verify_password(password, user.password):  # Usa `user.password`
             return None
         return user
 
@@ -63,9 +83,15 @@ class AuthService:
         return encoded_jwt
 
     @staticmethod
+<<<<<<< HEAD
     def get_current_user(token: str) -> UserRead:
         """
         Recupera el usuario actual desde el token JWT.
+=======
+    def get_current_user(token: str) -> Optional[UserRead]:
+        """
+        Decodes the JWT token and retrieves the user based on the email.
+>>>>>>> origin/test/juanma
         """
         credentials_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -73,12 +99,15 @@ class AuthService:
             headers={"WWW-Authenticate": "Bearer"},
         )
         try:
+            # Decodifica el token JWT
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             email: str = payload.get("sub")
             if email is None:
                 raise credentials_exception
-        except JWTError as ve:
-            raise credentials_exception from ve
+        except JWTError:
+            raise credentials_exception
+
+        # Busca el usuario en la base de datos usando el email
         user = UserService.get_user_by_email(email)
         if user is None:
             raise credentials_exception

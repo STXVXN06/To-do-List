@@ -43,7 +43,7 @@ class User(Base):  # pylint: disable=too-few-public-methods
     __tablename__ = "user"
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(100), unique=True, nullable=False)
-    password = Column(String(255), nullable=False)
+    password = Column(String(255))  # Solo aquí se maneja hashed_password
     role_id = Column(Integer, ForeignKey('role.id'), nullable=True)
     role = relationship("Role", back_populates="users")
     is_active = Column(Boolean, default=True)

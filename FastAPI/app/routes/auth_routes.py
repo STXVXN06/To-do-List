@@ -5,13 +5,15 @@ Includes endpoints for user registration and login,
 providing JWT tokens for authentication.
 """
 from typing import Optional
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Form
 from pydantic import BaseModel, EmailStr
 from datetime import timedelta
 from config.settings import ACCESS_TOKEN_EXPIRE_MINUTES
 from models.user import UserRead, UserCreate
 from services.auth_service import AuthService
 from services.user_service import UserService
+from utils.dependencies import OAuth2PasswordRequestFormEmail 
+
 
 router = APIRouter(
     tags=["Authentication"],
@@ -45,20 +47,18 @@ def register(user: UserCreate):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
         ) from e
-
+    
 @router.post("/login", response_model=Token)
-def login(user: UserCreate):
-    """Endpoint para autenticar un usuario y proporcionar un token JWT."""
-    user_auth = AuthService.authenticate_user(user.email, user.password)
-    if not user_auth:
+def login(form_data: OAuth2PasswordRequestFormEmail = Depends()):
+    # Autenticación usando el email
+    user = AuthService.authenticate_user(form_data.email, form_data.password)
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = AuthService.create_access_token(
-        data={"sub": user_auth.email},
-        expires_delta=access_token_expires
+        data={"sub": user.email}  # Guarda el email en el token
     )
     return {"access_token": access_token, "token_type": "bearer"}

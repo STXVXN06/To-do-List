@@ -8,7 +8,7 @@ from datetime import date
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Depends, status
 from models.user import UserRead
-from models.task import Task, TaskUpdate
+from models.task import Task, TaskUpdate, TaskCreate
 from models.change import Change
 from services.task_service import TaskService
 from utils.dependencies import get_current_user
@@ -17,31 +17,27 @@ router = APIRouter(
     prefix="/tasks",
     tags=["tasks"],
 )
-
 @router.post("/", response_model=Task, status_code=status.HTTP_201_CREATED)
 def create_task(
-    title: str,
-    description: Optional[str] = None,
-    expiration_date: Optional[date] = None,
-    status_id: int = 1,  # Default 'To Do'
-    current_user: UserRead = Depends(get_current_user)  # Cambiado de User a UserRead
+    task_data: TaskCreate,
+    current_user: UserRead = Depends(get_current_user)
 ) -> Task:
-    """
-    Create a new task.
-    """
-    task = TaskService.create_task(
-        title=title,
-        description=description,
-        expiration_date=expiration_date,
-        status_id=status_id,
+    task_model = TaskService.create_task(
+        title=task_data.title,
+        description=task_data.description,
+        expiration_date=task_data.expiration_date,
+        status_id=task_data.status_id,
         user_id=current_user.id
     )
-    return task
+    # Convierte el modelo ORM a un modelo Pydantic
+    return Task.from_orm(task_model)
+
+
 
 @router.get("/{task_id}", response_model=Task)
 def get_task(
     task_id: int,
-    current_user: UserRead = Depends(get_current_user)  # Cambiado de User a UserRead
+    current_user: UserRead = Depends(get_current_user)
 ) -> Task:
     """
     Get a task by its ID.
@@ -49,7 +45,7 @@ def get_task(
     is_admin = current_user.role.name == "Administrator"
     task = TaskService.get_task_by_id(task_id, user_id=current_user.id, is_admin=is_admin)
     if task:
-        return task
+        return Task.from_orm(task)  # Convierte de ORM a modelo Pydantic
     raise HTTPException(status_code=404, detail="Task not found")
 
 @router.put("/{task_id}", response_model=Task)
