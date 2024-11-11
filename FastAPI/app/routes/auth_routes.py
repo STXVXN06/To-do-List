@@ -5,14 +5,12 @@ Includes endpoints for user registration and login,
 providing JWT tokens for authentication.
 """
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Form
-from pydantic import BaseModel, EmailStr
-from datetime import timedelta
-from config.settings import ACCESS_TOKEN_EXPIRE_MINUTES
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import validator, BaseModel, EmailStr
 from models.user import UserRead, UserCreate
 from services.auth_service import AuthService
 from services.user_service import UserService
-from utils.dependencies import OAuth2PasswordRequestFormEmail 
+from utils.dependencies import OAuth2PasswordRequestFormEmail
 
 
 router = APIRouter(
@@ -26,8 +24,36 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     email: Optional[EmailStr] = None
 
+class UserCreateEnhanced(UserCreate):
+    """
+    Extended UserCreate model to add additional validations:
+    - Restrict email format to avoid special characters.
+    - Ensure non-empty fields.
+    """
+
+    @validator("email")
+    def email_format(cls, value):
+        # Permitir solo caracteres alfanuméricos, @, ., y _
+        valid_chars = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@._")
+        if not all(char in valid_chars for char in value):
+            raise ValueError("Email contains invalid characters")
+
+        # Validar el dominio (parte después de la última '.')
+        domain_part = value.split('.')[-1]
+        if len(domain_part) < 2:
+            raise ValueError("Email domain must have at least two characters after the last dot")
+
+        return value
+
+    @validator("password", "role_id", pre=True, always=True)
+    def non_empty_fields(cls, v):  # Método de clase, usa 'cls' en vez de 'self'
+        if v is None or v == "":
+            raise ValueError("This field cannot be empty")
+        return v
+    
+
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
-def register(user: UserCreate):
+def register(user: UserCreateEnhanced):
     existing_user = UserService.get_user_by_email(user.email)
     if existing_user:
         raise HTTPException(
