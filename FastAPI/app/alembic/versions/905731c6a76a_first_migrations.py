@@ -47,7 +47,7 @@ def upgrade() -> None:
     op.create_table('task',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(length=100), nullable=False),
-    sa.Column('description', sa.Text(), nullable=True),
+    sa.Column('description', sa.Text(), nullable=False),
     sa.Column('date_of_creation', sa.Date(), nullable=False),
     sa.Column('expiration_date', sa.Date(), nullable=True),
     sa.Column('status_id', sa.Integer(), nullable=False),
