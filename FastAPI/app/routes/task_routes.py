@@ -22,6 +22,13 @@ def create_task(
     task_data: TaskCreate,
     current_user: UserRead = Depends(get_current_user)
 ) -> Task:
+    # Validación de título y descripción
+    if not task_data.title.strip() or not task_data.description.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Title and description cannot be empty or contain only spaces.",
+        )
+
     task_model = TaskService.create_task(
         title=task_data.title,
         description=task_data.description,
