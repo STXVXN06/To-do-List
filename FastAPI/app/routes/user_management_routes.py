@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from models.user import UserRead, UserCreate, UserUpdate
 from services.user_service import UserService
 from utils.dependencies import get_current_admin
+from services.auth_service import AuthService
 
 router = APIRouter(
     prefix="/admin/users",
@@ -61,31 +62,26 @@ def get_user(
 def update_user(
     user_id: int,
     user_update: UserUpdate,
-    current_admin: UserRead = Depends(get_current_admin)  # Cambiar tipo a UserRead
+    current_admin: UserRead = Depends(get_current_admin)
 ) -> UserRead:
     """Update existing user information (for administrators only)."""
     verify_admin(current_admin)
 
-    updates = {}
-    if user_update.email is not None:
-        updates['email'] = user_update.email
-    if user_update.password is not None:
-        updates['password'] = user_update.password  # Hash the password before calling
-    if user_update.role_id is not None:
-        updates['role_id'] = user_update.role_id
-
-    if not updates:
-        raise HTTPException(status_code=400, detail="No data to update")
-
     try:
-        user = UserService.update_user(
+        # Si se proporciona una nueva contraseña, la encriptamos
+        hashed_password = None
+        if user_update.password:
+            hashed_password = AuthService.get_password_hash(user_update.password)
+
+        updated_user = UserService.update_user(
             user_id=user_id,
-            email=updates.get("email"),
-            password=updates.get("password"),
-            role_id=updates.get("role_id")
+            email=user_update.email,
+            password=hashed_password,  # Pasamos la contraseña encriptada
+            role_id=user_update.role_id
         )
-        if user:
-            return user
+        
+        if updated_user:
+            return updated_user
         raise HTTPException(status_code=404, detail="User not found")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e

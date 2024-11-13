@@ -10,9 +10,18 @@ from peewee import DoesNotExist
 from config.database import UserModel, RoleModel
 from models.user import UserRead
 from models.role import Role
+import re
 
 class UserService:
     """Service layer for User operations."""
+    
+    @staticmethod
+    def email_format(email: str) -> str:
+        """Valida que el formato del correo sea correcto."""
+        valid_chars = re.compile(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
+        if not valid_chars.match(email):
+            raise ValueError("Email format is invalid")
+        return email
 
     @staticmethod
     def create_user(email: str, password: str, role_id: int) -> UserRead:
@@ -115,31 +124,73 @@ class UserService:
     ) -> Optional[UserRead]:
         """
         Actualizar un usuario existente por su ID.
+        La contraseña debe venir ya hasheada desde el controlador.
         """
         try:
+            # Obtener el usuario existente
             user_instance = UserModel.get_by_id(user_id)
 
+            # Validar y actualizar email si se proporciona y no está vacío
             if email:
+                # Validar el formato del correo
+                email = UserService.email_format(email)
+
+                # Verificar si el email ya existe para otro usuario
+                existing_user = UserModel.select().where(
+                    (UserModel.email == email) & 
+                    (UserModel.id != user_id)
+                ).first()
+                if existing_user:
+                    raise ValueError("Email already registered")
+                
+                # Asignar el correo al usuario si es válido
                 user_instance.email = email
+            elif email == "":
+                raise ValueError("Email cannot be empty")
+
+            # Validar y actualizar la contraseña si se proporciona y no está vacía
             if password:
-                user_instance.password = password
+                user_instance.password = password  # Ya viene hasheada
+            elif password == "":
+                raise ValueError("Password cannot be empty")
+
+            # Validar y actualizar el rol si se proporciona y no está vacío
             if role_id:
                 try:
                     role_instance = RoleModel.get_by_id(role_id)
                     user_instance.role = role_instance
-                except DoesNotExist as exc:
-                    raise ValueError(f"Role with id {role_id} not found") from exc
+                except DoesNotExist:
+                    raise ValueError(f"Role with id {role_id} not found")
+            elif role_id == "":
+                raise ValueError("Role ID cannot be empty")
 
+            # Guardar los cambios
             user_instance.save()
 
-            # Preparar datos para Pydantic
-            user_data = user_instance.__data__.copy()
-            user_data['role_id'] = user_instance.role.id
-            user_data['role'] = user_instance.role
+            # Recargar la instancia para asegurar que tenemos los datos más recientes
+            user_instance = UserModel.get_by_id(user_id)
+            
+            # Crear el objeto Role para el UserRead
+            role = Role(
+                id=user_instance.role.id,
+                name=user_instance.role.name
+            )
 
-            return UserRead.model_validate(user_data)
+            # Crear el UserRead con los datos actualizados
+            updated_user = UserRead(
+                id=user_instance.id,
+                email=user_instance.email,
+                role_id=user_instance.role.id,
+                is_active=user_instance.is_active,
+                role=role
+            )
+
+            return updated_user
+
         except DoesNotExist:
             return None
+        except Exception as e:
+            raise ValueError(str(e)) from e
 
     @staticmethod
     def delete_user(user_id: int) -> bool:
