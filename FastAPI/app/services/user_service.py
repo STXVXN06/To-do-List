@@ -163,6 +163,8 @@ class UserService:
                     raise ValueError(f"Role with id {role_id} not found")
             elif role_id == "":
                 raise ValueError("Role ID cannot be empty")
+            elif role_id == 0:
+                raise ValueError("Role ID cannot be zero")
 
             # Guardar los cambios
             user_instance.save()
