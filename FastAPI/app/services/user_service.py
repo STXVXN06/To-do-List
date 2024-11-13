@@ -6,6 +6,7 @@ It interacts with the `UserModel` and uses the `User` model from Pydantic for da
 """
 
 from typing import Optional, List
+from fastapi import HTTPException
 from peewee import DoesNotExist
 from config.database import UserModel, RoleModel
 from models.user import UserRead
@@ -44,8 +45,10 @@ class UserService:
             user_data['role'] = Role.model_validate(role_data)  # Usar el modelo Pydantic Role
             
             return UserRead.model_validate(user_data)
-        except DoesNotExist as exc:
-            raise ValueError(f"Role with id {role_id} not found") from exc
+        except DoesNotExist:
+            raise HTTPException(status_code=404, detail=f"Status:{404}, Role with id {role_id} not found")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
 
     @staticmethod
     def get_user_by_email_login(email: str) -> Optional[UserModel]:
@@ -126,11 +129,20 @@ class UserService:
         Actualizar un usuario existente por su ID.
         La contraseña debe venir ya hasheada desde el controlador.
         """
+
+        # Validación inicial para evitar valores vacíos
+        if email == "" or (email is not None and not email.strip()):
+            raise ValueError("Email cannot be empty")
+        if password == "" or (password is not None and not password.strip()):
+            raise ValueError("Password cannot be empty")
+        if role_id == "" or role_id == 0:
+            raise ValueError("Role ID cannot be empty or zero")
+
         try:
             # Obtener el usuario existente
             user_instance = UserModel.get_by_id(user_id)
 
-            # Validar y actualizar email si se proporciona y no está vacío
+            # Validar y actualizar email si se proporciona
             if email:
                 # Validar el formato del correo
                 email = UserService.email_format(email)
@@ -145,28 +157,20 @@ class UserService:
                 
                 # Asignar el correo al usuario si es válido
                 user_instance.email = email
-            elif email == "":
-                raise ValueError("Email cannot be empty")
 
-            # Validar y actualizar la contraseña si se proporciona y no está vacía
+            # Validar y actualizar la contraseña si se proporciona
             if password:
                 user_instance.password = password  # Ya viene hasheada
-            elif password == "":
-                raise ValueError("Password cannot be empty")
 
-            # Validar y actualizar el rol si se proporciona y no está vacío
+            # Validar y actualizar el rol si se proporciona
             if role_id:
                 try:
                     role_instance = RoleModel.get_by_id(role_id)
                     user_instance.role = role_instance
                 except DoesNotExist:
                     raise ValueError(f"Role with id {role_id} not found")
-            elif role_id == "":
-                raise ValueError("Role ID cannot be empty")
-            elif role_id == 0:
-                raise ValueError("Role ID cannot be zero")
 
-            # Guardar los cambios
+            # Guardar los cambios solo si todas las validaciones se pasaron correctamente
             user_instance.save()
 
             # Recargar la instancia para asegurar que tenemos los datos más recientes
@@ -190,7 +194,7 @@ class UserService:
             return updated_user
 
         except DoesNotExist:
-            return None
+            raise HTTPException(status_code=404, detail=f"Status:{404}, User not found")
         except Exception as e:
             raise ValueError(str(e)) from e
 

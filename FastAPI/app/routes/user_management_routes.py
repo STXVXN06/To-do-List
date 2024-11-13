@@ -68,11 +68,22 @@ def update_user(
     verify_admin(current_admin)
 
     try:
-        # Si se proporciona una nueva contraseña, la encriptamos
+        # Verificar que el email no esté vacío si se proporciona
+        if user_update.email is not None and not user_update.email.strip():
+            raise ValueError("Email cannot be empty")
+        
+        # Verificar que la contraseña no esté vacía si se proporciona
         hashed_password = None
-        if user_update.password:
+        if user_update.password is not None:
+            if not user_update.password.strip():  # Comprueba si `password` tiene solo espacios
+                raise ValueError("Password field cannot be empty")
             hashed_password = AuthService.get_password_hash(user_update.password)
+        
+        # Verificar que el role_id no sea vacío, 0 o None
+        if user_update.role_id == "" or user_update.role_id == 0:
+            raise ValueError("Role ID cannot be empty or zero")
 
+        # Intentar actualizar el usuario si todas las validaciones se pasan
         updated_user = UserService.update_user(
             user_id=user_id,
             email=user_update.email,
@@ -83,8 +94,12 @@ def update_user(
         if updated_user:
             return updated_user
         raise HTTPException(status_code=404, detail="User not found")
+    
     except ValueError as e:
+        # Capturar cualquier error de validación y devolver un 400
         raise HTTPException(status_code=400, detail=str(e)) from e
+
+
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(
