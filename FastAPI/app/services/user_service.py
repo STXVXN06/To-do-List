@@ -1,3 +1,4 @@
+# Pylint: disable=import-error, no-member
 """
 Service layer for User operations.
 
@@ -6,7 +7,7 @@ It interacts with the `UserModel` and uses the `User` model from Pydantic for da
 """
 
 from typing import Optional, List
-from peewee import DoesNotExist
+from peewee import DoesNotExist  # <-- Fixed the issue here
 from config.database import UserModel, RoleModel
 from models.user import UserRead
 from models.role import Role
@@ -17,23 +18,20 @@ class UserService:
     @staticmethod
     def create_user(email: str, password: str, role_id: int) -> UserRead:
         """
-        Crear un nuevo usuario.
+        Create a new user.
         """
         try:
             role_instance = RoleModel.get_by_id(role_id)
             user_instance = UserModel.create(email=email, password=password, role=role_instance)
-            
-            # Preparar datos para Pydantic
+            # Prepare data for Pydantic
             user_data = user_instance.__data__.copy()
-            user_data['role_id'] = role_instance.id  # Añadir role_id explícitamente
-            
-            # Serializar el campo 'role' correctamente
+            user_data['role_id'] = role_instance.id  # Add role_id explicitly
+            # Serialize the 'role' field correctly
             role_data = {
                 "id": role_instance.id,
                 "name": role_instance.name
             }
-            user_data['role'] = Role.model_validate(role_data)  # Usar el modelo Pydantic Role
-            
+            user_data['role'] = Role.model_validate(role_data)  # Using the Pydantic Role model
             return UserRead.model_validate(user_data)
         except DoesNotExist as exc:
             raise ValueError(f"Role with id {role_id} not found") from exc
@@ -41,32 +39,29 @@ class UserService:
     @staticmethod
     def get_user_by_email_login(email: str) -> Optional[UserModel]:
         """
-        Recupera el usuario completo desde la base de datos por su email.
+        Retrieve the complete user from the database by email.
         """
         try:
             return UserModel.get(UserModel.email == email)
-        except UserModel.DoesNotExist:
+        except DoesNotExist:  # <-- Fixed the issue here
             return None
-
 
     @staticmethod
     def get_user_by_email(email: str) -> Optional[UserRead]:
         """
-        Obtener un usuario por su email.
+        Obtain a user by email.
         """
         try:
             user_instance = UserModel.get(UserModel.email == email)
             user_data = user_instance.__data__.copy()
-            user_data['role_id'] = user_instance.role.id  # Añadir role_id explícitamente
-            
-            # Serializar el campo 'role' correctamente
+            user_data['role_id'] = user_instance.role.id  # Add role_id explicitly
+            #  Serialize the 'role' field correctly
             role_instance = user_instance.role
             role_data = {
                 "id": role_instance.id,
                 "name": role_instance.name
             }
-            user_data['role'] = Role.model_validate(role_data)  # Usar el modelo Pydantic Role
-            
+            user_data['role'] = Role.model_validate(role_data)  # Using the Pydantic Role model
             return UserRead.model_validate(user_data)
         except DoesNotExist:
             return None
@@ -74,29 +69,26 @@ class UserService:
     @staticmethod
     def get_user_by_id(user_id: int) -> Optional[UserRead]:
         """
-        Obtener un usuario por su ID.
+        Obtain a user by ID.
         """
         try:
             user_instance = UserModel.get_by_id(user_id)
             user_data = user_instance.__data__.copy()
-            user_data['role_id'] = user_instance.role.id  # Añadir role_id explícitamente
-            
-            # Serializar el campo 'role' correctamente
+            user_data['role_id'] = user_instance.role.id  # Add role_id explicitly
+            # Serialize the 'role' field correctly
             role_instance = user_instance.role
             role_data = {
                 "id": role_instance.id,
                 "name": role_instance.name
             }
-            user_data['role'] = Role.model_validate(role_data)  # Usar el modelo Pydantic Role
-            
+            user_data['role'] = Role.model_validate(role_data)  #  Using the Pydantic Role model
             return UserRead.model_validate(user_data)
         except DoesNotExist:
             return None
-
     @staticmethod
     def update_user_status(user_id: int, is_active: bool) -> bool:
         """
-        Actualiza el estado activo de un usuario.
+        Updates the active status of a user.
         """
         try:
             user_instance = UserModel.get_by_id(user_id)
@@ -105,7 +97,6 @@ class UserService:
             return True
         except DoesNotExist:
             return False
-        
     @staticmethod
     def update_user(
         user_id: int,
@@ -114,7 +105,7 @@ class UserService:
         role_id: Optional[int] = None,
     ) -> Optional[UserRead]:
         """
-        Actualizar un usuario existente por su ID.
+        Update an existing user by its ID.
         """
         try:
             user_instance = UserModel.get_by_id(user_id)
@@ -132,7 +123,7 @@ class UserService:
 
             user_instance.save()
 
-            # Preparar datos para Pydantic
+            # Prepare data for Pydantic
             user_data = user_instance.__data__.copy()
             user_data['role_id'] = user_instance.role.id
             user_data['role'] = user_instance.role
@@ -144,7 +135,7 @@ class UserService:
     @staticmethod
     def delete_user(user_id: int) -> bool:
         """
-        Eliminar un usuario por su ID.
+        Delete a user by ID.
         """
         try:
             user_instance = UserModel.get_by_id(user_id)
@@ -156,7 +147,7 @@ class UserService:
     @staticmethod
     def list_all_users() -> List[UserRead]:
         """
-        Obtener una lista de todos los usuarios.
+        Get a list of all users.
         """
         users = UserModel.select().where(UserModel.role == 2)
         return users

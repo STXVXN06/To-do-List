@@ -22,6 +22,16 @@ def create_task(
     task_data: TaskCreate,
     current_user: UserRead = Depends(get_current_user)
 ) -> Task:
+    """
+    Create a new task for the current user.
+
+    Parameters:
+    - task_data: The task details (title, description, expiration date, etc.)
+    - current_user: The user creating the task.
+
+    Returns:
+    - A Task object representing the newly created task.
+    """
     task_model = TaskService.create_task(
         title=task_data.title,
         description=task_data.description,
@@ -29,7 +39,7 @@ def create_task(
         status_id=task_data.status_id,
         user_id=current_user.id
     )
-    # Convierte el modelo ORM a un modelo Pydantic
+    # Converts ORM model to Pydantic model
     return Task.from_orm(task_model)
 
 

@@ -1,8 +1,9 @@
+# pylint: disable=import-error, no-member
 """
 Module defining services for managing tasks.
 """
 
-from datetime import date, datetime
+from datetime import date
 from typing import List, Optional
 from models.task import Task
 from models.change import Change
@@ -20,9 +21,9 @@ class TaskService:
         expiration_date: Optional[date],
         status_id: int,
         user_id: int,
-    ) -> TaskModel:  # Devuelve el modelo de la base de datos
+    ) -> TaskModel:  # Returns the database model
         """Creates a new task."""
-        task = TaskModel.create(  # Asegúrate de usar el modelo ORM aquí
+        task = TaskModel.create(
             title=title,
             description=description,
             expiration_date=expiration_date,
@@ -34,11 +35,10 @@ class TaskService:
     @staticmethod
     def get_task_by_id(task_id: int, user_id: int, is_admin: bool) -> Optional[TaskModel]:
         """Retrieves a task by ID, checking user permissions."""
-        task = TaskModel.get_or_none(TaskModel.id == task_id)  # Usa el modelo ORM aquí
+        task = TaskModel.get_or_none(TaskModel.id == task_id)
         if task and (task.user_id == user_id or is_admin):
             return task
         return None
-    
     @staticmethod
     def update_task(
         task_id: int, user_id: int, is_admin: bool, **updates
