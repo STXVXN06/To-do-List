@@ -18,8 +18,11 @@ router = APIRouter(
 )
 
 class Token(BaseModel):
+    status : str
+    status_code: int
     access_token: str
     token_type: str
+    
 
 class TokenData(BaseModel):
     email: Optional[EmailStr] = None
@@ -87,4 +90,9 @@ def login(form_data: OAuth2PasswordRequestFormEmail = Depends()):
     access_token = AuthService.create_access_token(
         data={"sub": user.email}  # Guarda el email en el token
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "status": "success",
+        "status_code": status.HTTP_200_OK,
+        "access_token": access_token,
+        "token_type": "Bearer"
+    }

@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from models.user import UserRead, UserCreate, UserUpdate
 from services.user_service import UserService
 from utils.dependencies import get_current_admin
+from services.auth_service import AuthService
 
 router = APIRouter(
     prefix="/admin/users",
@@ -61,34 +62,44 @@ def get_user(
 def update_user(
     user_id: int,
     user_update: UserUpdate,
-    current_admin: UserRead = Depends(get_current_admin)  # Cambiar tipo a UserRead
+    current_admin: UserRead = Depends(get_current_admin)
 ) -> UserRead:
     """Update existing user information (for administrators only)."""
     verify_admin(current_admin)
 
-    updates = {}
-    if user_update.email is not None:
-        updates['email'] = user_update.email
-    if user_update.password is not None:
-        updates['password'] = user_update.password  # Hash the password before calling
-    if user_update.role_id is not None:
-        updates['role_id'] = user_update.role_id
-
-    if not updates:
-        raise HTTPException(status_code=400, detail="No data to update")
-
     try:
-        user = UserService.update_user(
+        # Verificar que el email no esté vacío si se proporciona
+        if user_update.email is not None and not user_update.email.strip():
+            raise ValueError("Email cannot be empty")
+        
+        # Verificar que la contraseña no esté vacía si se proporciona
+        hashed_password = None
+        if user_update.password is not None:
+            if not user_update.password.strip():  # Comprueba si `password` tiene solo espacios
+                raise ValueError("Password field cannot be empty")
+            hashed_password = AuthService.get_password_hash(user_update.password)
+        
+        # Verificar que el role_id no sea vacío, 0 o None
+        if user_update.role_id == "" or user_update.role_id == 0:
+            raise ValueError("Role ID cannot be empty or zero")
+
+        # Intentar actualizar el usuario si todas las validaciones se pasan
+        updated_user = UserService.update_user(
             user_id=user_id,
-            email=updates.get("email"),
-            password=updates.get("password"),
-            role_id=updates.get("role_id")
+            email=user_update.email,
+            password=hashed_password,  # Pasamos la contraseña encriptada
+            role_id=user_update.role_id
         )
-        if user:
-            return user
+        
+        if updated_user:
+            return updated_user
         raise HTTPException(status_code=404, detail="User not found")
+    
     except ValueError as e:
+        # Capturar cualquier error de validación y devolver un 400
         raise HTTPException(status_code=400, detail=str(e)) from e
+
+
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(
