@@ -54,7 +54,7 @@ class Task(Base): # pylint: disable=too-few-public-methods
     __tablename__ = "task"
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(100), nullable=False)
-    description = Column(Text, nullable=True)
+    description = Column(Text, nullable=False)
     date_of_creation = Column(Date, nullable=False)
     expiration_date = Column(Date, nullable=True)
     status_id = Column(Integer, ForeignKey('status.id'), nullable=False)

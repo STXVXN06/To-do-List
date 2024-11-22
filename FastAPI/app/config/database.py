@@ -70,7 +70,7 @@ class TaskModel(Model):
     """Task table with relationships to User and Status."""
     id = AutoField(primary_key=True)
     title = CharField(null=False)
-    description = TextField(null=True)
+    description = TextField(null=False)
     date_of_creation = DateField(default=date.today, null=False)
     expiration_date = DateField(null=True)
     status = ForeignKeyField(StatusModel, backref='tasks', on_delete='CASCADE')
