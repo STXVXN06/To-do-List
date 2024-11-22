@@ -1,3 +1,4 @@
+# pylint: disable=too-few-public-methods
 """
 Security dependencies for authentication and authorization handling.
 Includes functions to obtain the current user and verify roles.
@@ -10,7 +11,12 @@ from services.auth_service import AuthService
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
+
 class OAuth2PasswordRequestFormEmail:
+    """
+    Security dependencies for authentication and authorization handling.
+    Includes functions to obtain the current user and verify roles.
+    """
     def __init__(self, email: str = Form(...), password: str = Form(...)):
         self.email = email
         self.password = password

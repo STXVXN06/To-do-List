@@ -32,7 +32,19 @@ def create_user(
     user: UserCreate,
     current_admin: UserRead = Depends(get_current_admin)  # Cambiar tipo a UserRead
 ) -> UserRead:
-    # """Create a new user (for administrators only)."""
+    """
+    Create a new user in the system.
+    Args:
+        user (UserCreate): The user data required to create a new user.
+        current_admin (UserRead, optional):
+        The current admin user making the request.
+        Defaults to the result of get_current_admin.
+    Returns:
+        UserRead: The created user data.
+    Raises:
+        HTTPException: If there is a validation error 
+        (status code 400) or an unexpected error (status code 500).
+    """
     verify_admin(current_admin)
 
     try:
@@ -127,6 +139,6 @@ def toggle_user_active(
         raise HTTPException(status_code=404, detail="User not found")
 
     user.is_active = not user.is_active
-    # Ya que UserRead es de solo lectura, necesitas actualizar el modelo ORM directamente
+    # Since UserRead is read-only, you need to update the ORM model directly.
     UserService.update_user_status(user_id, user.is_active)
     return {"message": f"User {user_id} is now {'active' if user.is_active else 'inactive'}"}

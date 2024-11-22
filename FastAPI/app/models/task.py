@@ -1,3 +1,4 @@
+# pylint: disable=import-error, no-member,too-few-public-methods
 """
 This module defines the Task class, which represents a task model for handling 
 task-related data within an application.
@@ -50,15 +51,27 @@ class Task(BaseModel):
     changes: Optional[List[Change]] = None
 
     class Config:
+        """
+        Configuration class for the Task model.
+        Attributes:
+            from_attributes (bool): Indicates whether to use attributes from the ORM model.
+        """
         from_attributes = True  # Cambia 'orm_mode' a 'from_attributes' para Pydantic v2
-        
+
 class TaskCreate(BaseModel):
+    """
+    TaskCreate is a Pydantic model for creating a new task.
+    Attributes:
+        title (str): The title of the task.
+        description (Optional[str]): An optional description of the task.
+        expiration_date (Optional[date]): An optional expiration date for the task.
+        status_id (int): The ID representing the status of the task.
+    """
+
     title: str
     description: Optional[str] = None
     expiration_date: Optional[date] = None
     status_id: int
-
-    
 class TaskUpdate(BaseModel):
     """
     This is so that the task can be updated.

@@ -9,11 +9,12 @@ Necessary imports to define data models using Peewee ORM.
 """
 from datetime import date, datetime  # Importa datetime
 from dotenv import load_dotenv
-from config.settings import DATABASE
 from peewee import (
     MySQLDatabase, Model, CharField, TextField, DateField,
-    ForeignKeyField, BooleanField, DateTimeField, Check, AutoField, fn, SQL
+    ForeignKeyField, BooleanField, DateTimeField, Check, AutoField, SQL
 )
+from config.settings import DATABASE
+
 
 # Load environment variables from the .env file
 load_dotenv()

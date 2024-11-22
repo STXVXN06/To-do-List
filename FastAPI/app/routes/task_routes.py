@@ -22,6 +22,7 @@ def create_task(
     task_data: TaskCreate,
     current_user: UserRead = Depends(get_current_user)
 ) -> Task:
+<<<<<<< HEAD
     # Validación de título y descripción
     if not task_data.title.strip() or not task_data.description.strip():
         raise HTTPException(
@@ -29,6 +30,18 @@ def create_task(
             detail="Title and description cannot be empty or contain only spaces.",
         )
 
+=======
+    """
+    Create a new task for the current user.
+
+    Parameters:
+    - task_data: The task details (title, description, expiration date, etc.)
+    - current_user: The user creating the task.
+
+    Returns:
+    - A Task object representing the newly created task.
+    """
+>>>>>>> 995301a9ad8cd20d1078bf6be8d0d793bc5747b7
     task_model = TaskService.create_task(
         title=task_data.title,
         description=task_data.description,
@@ -36,7 +49,7 @@ def create_task(
         status_id=task_data.status_id,
         user_id=current_user.id
     )
-    # Convierte el modelo ORM a un modelo Pydantic
+    # Converts ORM model to Pydantic model
     return Task.from_orm(task_model)
 
 
