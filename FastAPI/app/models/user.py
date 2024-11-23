@@ -8,7 +8,11 @@ their email, role, and active status.
 
 from typing import Optional
 from pydantic import BaseModel, EmailStr
+<<<<<<< HEAD
 from .role import Role
+=======
+from models.role import Role
+>>>>>>> c81537e (Fixed the import in user)
 
 class UserRead(BaseModel):
     """
