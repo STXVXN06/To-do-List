@@ -32,7 +32,7 @@ jobs:
 
       - name: Analysing the code with pylint
         run: |
-          if [ ${{ steps.rate.outputs.rate }} -gt 9 ]; then
+          if [ ${{ steps.rate.outputs.rate }} -gt 7 ]; then
             pylint $(git ls-files '*.py')
           else
             echo "Rate is not greater than 9. Skipping pylint analysis."

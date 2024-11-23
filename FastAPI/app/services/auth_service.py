@@ -1,58 +1,53 @@
 """
-Authentication Service for handling password hashing and JWT.
-
-Includes functions for verifying passwords, hashing passwords,
-authenticating users, and creating access tokens.
+Authentication service for handling password hashing, JWT creation, and user authentication.
 """
+
 from datetime import datetime, timedelta
 from typing import Optional
 
 from fastapi import HTTPException, status
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from config.settings import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
-from services.user_service import UserService
-from models.user import UserRead  # Asegúrate de importar UserRead correctamente
-from config.database import UserModel
-# Configurar passlib context para password hashing
 
+from config.settings import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from config.database import UserModel
+from models.user import UserRead
+from services.user_service import UserService
+
+# Config passlib context para password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class AuthService:
-    """Authentication Service."""
+    """Service class for handling authentication operations."""
 
     @staticmethod
     def verify_password(plain_password: str, password: str) -> bool:
-        """Verifica si la contraseña en texto plano coincide con la contraseña hasheada."""
+        """Verify if the plaintext password matches the hashed password."""
         return pwd_context.verify(plain_password, password)
 
     @staticmethod
     def get_password_hash(password: str) -> str:
-        """Hashea una contraseña en texto plano antes de almacenarla."""
+        """Hashea a password in plain text before storing it."""
         return pwd_context.hash(password)
 
     @staticmethod
     def authenticate_user(email: str, password: str) -> Optional[UserModel]:
         """
-        Autentica a un usuario utilizando su email y contraseña.
+        Authenticate a user using their email and password.
         """
         user = UserService.get_user_by_email_login(email)
-        if not user or not AuthService.verify_password(password, user.password):  # Usa `user.password`
+        if not user or not AuthService.verify_password(password, user.password):
             return None
         return user
 
     @staticmethod
-    def create_access_token(
-        data: dict, expires_delta: Optional[timedelta] = None
-    ) -> str:
+    def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
         """
-        Crea un token de acceso JWT.
+        Create a JWT access token.
         """
         to_encode = data.copy()
-        if expires_delta:
-            expire = datetime.utcnow() + expires_delta
-        else:
-            expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.utcnow()+(expires_delta if expires_delta else
+                                      timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
         return encoded_jwt
@@ -60,7 +55,16 @@ class AuthService:
     @staticmethod
     def get_current_user(token: str) -> Optional[UserRead]:
         """
-        Decodes the JWT token and retrieves the user based on the email.
+        Decode a JWT token and retrieve the user based on the email in the token payload.
+
+        Args:
+            token (str): The JWT token to decode.
+
+        Returns:
+            Optional[UserRead]: The user object if authentication is successful.
+
+        Raises:
+            HTTPException: If token validation fails.
         """
         credentials_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -68,15 +72,15 @@ class AuthService:
             headers={"WWW-Authenticate": "Bearer"},
         )
         try:
-            # Decodifica el token JWT
+            # Decode the JWT token
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             email: str = payload.get("sub")
             if email is None:
                 raise credentials_exception
-        except JWTError:
-            raise credentials_exception
+        except JWTError as exc:
+            raise credentials_exception from exc
 
-        # Busca el usuario en la base de datos usando el email
+        # Searches for the user in the database using the email address
         user = UserService.get_user_by_email(email)
         if user is None:
             raise credentials_exception

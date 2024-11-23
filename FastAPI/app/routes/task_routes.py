@@ -22,6 +22,16 @@ def create_task(
     task_data: TaskCreate,
     current_user: UserRead = Depends(get_current_user)
 ) -> Task:
+    """
+    Create a new task for the current user.
+
+    Parameters:
+    - task_data: The task details (title, description, expiration date, etc.)
+    - current_user: The user creating the task.
+
+    Returns:
+    - A Task object representing the newly created task.
+    """
     task_model = TaskService.create_task(
         title=task_data.title,
         description=task_data.description,
@@ -29,7 +39,7 @@ def create_task(
         status_id=task_data.status_id,
         user_id=current_user.id
     )
-    # Convierte el modelo ORM a un modelo Pydantic
+    # Converts ORM model to Pydantic model
     return Task.from_orm(task_model)
 
 
@@ -45,14 +55,14 @@ def get_task(
     is_admin = current_user.role.name == "Administrator"
     task = TaskService.get_task_by_id(task_id, user_id=current_user.id, is_admin=is_admin)
     if task:
-        return Task.from_orm(task)  # Convierte de ORM a modelo Pydantic
+        return Task.from_orm(task)  # Converts ORM model to Pydantic model
     raise HTTPException(status_code=404, detail="Task not found")
 
 @router.put("/{task_id}", response_model=Task)
 def update_task(
     task_id: int,
     task_update: TaskUpdate,
-    current_user: UserRead = Depends(get_current_user)  # Cambiado de User a UserRead
+    current_user: UserRead = Depends(get_current_user)  # Changed from User to UserRead
 ) -> Task:
     """Update an existing task."""
     is_admin = current_user.role.name == "Administrator"
@@ -69,7 +79,7 @@ def update_task(
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_task(
     task_id: int,
-    current_user: UserRead = Depends(get_current_user)  # Cambiado de User a UserRead
+    current_user: UserRead = Depends(get_current_user)  # Changed from User to UserRead
 ):
     """
     Delete a task by its ID.
@@ -88,7 +98,7 @@ def delete_task(
 def list_tasks(
     task_status: Optional[str] = None,
     expiration_date: Optional[date] = None,
-    current_user: UserRead = Depends(get_current_user)  # Cambiado de User a UserRead
+    current_user: UserRead = Depends(get_current_user)  # Changed from User to UserRead
 ) -> List[Task]:
     """
     List all tasks for the user with filtering options.
@@ -105,7 +115,7 @@ def list_tasks(
 @router.patch("/{task_id}/favorite", response_model=Task)
 def toggle_favorite(
     task_id: int,
-    current_user: UserRead = Depends(get_current_user)  # Cambiado de User a UserRead
+    current_user: UserRead = Depends(get_current_user)  # Changed from User to UserRead
 ) -> Task:
     """
     Toggle the favorite status of a task.
@@ -123,7 +133,7 @@ def toggle_favorite(
 @router.get("/{task_id}/changes", response_model=List[Change])
 def get_task_changes(
     task_id: int,
-    current_user: UserRead = Depends(get_current_user)  # Cambiado de User a UserRead
+    current_user: UserRead = Depends(get_current_user)  # Changed from User to UserReadd
 ) -> List[Change]:
     """
     Get the change history of a specific task.

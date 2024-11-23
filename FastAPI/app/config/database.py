@@ -9,11 +9,12 @@ Necessary imports to define data models using Peewee ORM.
 """
 from datetime import date, datetime  # Importa datetime
 from dotenv import load_dotenv
-from config.settings import DATABASE
 from peewee import (
     MySQLDatabase, Model, CharField, TextField, DateField,
-    ForeignKeyField, BooleanField, DateTimeField, Check, AutoField, fn, SQL
+    ForeignKeyField, BooleanField, DateTimeField, Check, AutoField, SQL
 )
+from config.settings import DATABASE
+
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -70,7 +71,7 @@ class TaskModel(Model):
     """Task table with relationships to User and Status."""
     id = AutoField(primary_key=True)
     title = CharField(null=False)
-    description = TextField(null=True)
+    description = TextField(null=False)
     date_of_creation = DateField(default=date.today, null=False)
     expiration_date = DateField(null=True)
     status = ForeignKeyField(StatusModel, backref='tasks', on_delete='CASCADE')
