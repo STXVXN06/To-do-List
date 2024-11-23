@@ -8,7 +8,7 @@ their email, role, and active status.
 
 from typing import Optional
 from pydantic import BaseModel, EmailStr
-from app.models.role import Role
+from models.role import Role
 
 class UserRead(BaseModel):
     """
