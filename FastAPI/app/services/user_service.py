@@ -6,21 +6,18 @@ This module contains the business logic for managing users.
 It interacts with the `UserModel` and uses the `User` model from Pydantic for data validation.
 """
 
-from typing import Optional, List
-<<<<<<< HEAD
-from fastapi import HTTPException
-from peewee import DoesNotExist
-=======
-from peewee import DoesNotExist  # <-- Fixed the issue here
->>>>>>> 995301a9ad8cd20d1078bf6be8d0d793bc5747b7
-from config.database import UserModel, RoleModel
-from models.user import UserRead
-from models.role import Role
 import re
+from typing import Optional, List
+
+from fastapi import HTTPException
+from peewee import DoesNotExist  # <-- Fixed the issue here
+
+from config.database import UserModel, RoleModel
+from models.role import Role
+from models.user import UserRead
 
 class UserService:
-    """Service layer for User operations."""
-    
+    """Service layer for User operations."""    
     @staticmethod
     def email_format(email: str) -> str:
         """Valida que el formato del correo sea correcto."""
@@ -47,10 +44,11 @@ class UserService:
             }
             user_data['role'] = Role.model_validate(role_data)  # Using the Pydantic Role model
             return UserRead.model_validate(user_data)
-        except DoesNotExist:
-            raise HTTPException(status_code=404, detail=f"Status:{404}, Role with id {role_id} not found")
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        except DoesNotExist as exc:
+            raise HTTPException(status_code=404,
+                                detail=f"Status:{404},Role with id {role_id} not found") from exc
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=str(exc)) from exc
 
     @staticmethod
     def get_user_by_email_login(email: str) -> Optional[UserModel]:
@@ -121,88 +119,60 @@ class UserService:
         role_id: Optional[int] = None,
     ) -> Optional[UserRead]:
         """
-<<<<<<< HEAD
-        Actualizar un usuario existente por su ID.
-        La contraseña debe venir ya hasheada desde el controlador.
-=======
         Update an existing user by its ID.
->>>>>>> 995301a9ad8cd20d1078bf6be8d0d793bc5747b7
         """
 
-        # Validación inicial para evitar valores vacíos
+        # Initial validation to avoid empty values
         if email == "" or (email is not None and not email.strip()):
             raise ValueError("Email cannot be empty")
         if password == "" or (password is not None and not password.strip()):
             raise ValueError("Password cannot be empty")
-        if role_id == "" or role_id == 0:
+        if role_id in {"", 0}:
             raise ValueError("Role ID cannot be empty or zero")
 
         try:
-            # Obtener el usuario existente
+            # Retrieve the existing user
             user_instance = UserModel.get_by_id(user_id)
 
-            # Validar y actualizar email si se proporciona
+            # Validate and update email if provided
             if email:
-                # Validar el formato del correo
+                # Validate the email format
                 email = UserService.email_format(email)
 
-                # Verificar si el email ya existe para otro usuario
+                # Check if the email already exists for another user
                 existing_user = UserModel.select().where(
-                    (UserModel.email == email) & 
+                    (UserModel.email == email)&
                     (UserModel.id != user_id)
                 ).first()
                 if existing_user:
                     raise ValueError("Email already registered")
-                
-                # Asignar el correo al usuario si es válido
+                # Assign the email to the user if it is valid
                 user_instance.email = email
 
-            # Validar y actualizar la contraseña si se proporciona
+            # Validate and update the password if provided
             if password:
-                user_instance.password = password  # Ya viene hasheada
+                user_instance.password = password  # Already hashed
 
-            # Validar y actualizar el rol si se proporciona
+            # Validate and update the role if provided
             if role_id:
                 try:
                     role_instance = RoleModel.get_by_id(role_id)
                     user_instance.role = role_instance
-                except DoesNotExist:
-                    raise ValueError(f"Role with id {role_id} not found")
+                except DoesNotExist as exc:
+                    raise ValueError(f"Role with id {role_id} not found") from exc
 
-            # Guardar los cambios solo si todas las validaciones se pasaron correctamente
+            # Save changes only if all validations passed successfully
             user_instance.save()
 
-<<<<<<< HEAD
-            # Recargar la instancia para asegurar que tenemos los datos más recientes
-            user_instance = UserModel.get_by_id(user_id)
-            
-            # Crear el objeto Role para el UserRead
-            role = Role(
-                id=user_instance.role.id,
-                name=user_instance.role.name
-            )
-
-            # Crear el UserRead con los datos actualizados
-            updated_user = UserRead(
-                id=user_instance.id,
-                email=user_instance.email,
-                role_id=user_instance.role.id,
-                is_active=user_instance.is_active,
-                role=role
-            )
-
-            return updated_user
-=======
             # Prepare data for Pydantic
             user_data = user_instance.__data__.copy()
             user_data['role_id'] = user_instance.role.id
             user_data['role'] = user_instance.role
->>>>>>> 995301a9ad8cd20d1078bf6be8d0d793bc5747b7
 
-        except DoesNotExist:
-            raise HTTPException(status_code=404, detail=f"Status:{404}, User not found")
-        except Exception as e:
-            raise ValueError(str(e)) from e
+        except DoesNotExist as exc:
+            raise HTTPException(status_code=404, detail=f"Status:{404}, User not found") from exc
+        except Exception as exc:
+            raise ValueError(str(exc)) from exc
 
     @staticmethod
     def delete_user(user_id: int) -> bool:

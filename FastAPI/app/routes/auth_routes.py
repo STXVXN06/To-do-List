@@ -6,29 +6,17 @@ providing JWT tokens for authentication.
 """
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
-<<<<<<< HEAD
-from pydantic import validator, BaseModel, EmailStr
-=======
-from pydantic import BaseModel, EmailStr
->>>>>>> 995301a9ad8cd20d1078bf6be8d0d793bc5747b7
+from pydantic import BaseModel, EmailStr, validator
 from models.user import UserRead, UserCreate
 from services.auth_service import AuthService
 from services.user_service import UserService
 from utils.dependencies import OAuth2PasswordRequestFormEmail
-<<<<<<< HEAD
-
-=======
->>>>>>> 995301a9ad8cd20d1078bf6be8d0d793bc5747b7
 
 router = APIRouter(
     tags=["Authentication"],
 )
 
 class Token(BaseModel):
-<<<<<<< HEAD
-    status : str
-    status_code: int
-=======
     """
     Token response model for authentication.
 
@@ -39,11 +27,8 @@ class Token(BaseModel):
     token_type : str
         The type of the token (usually "bearer").
     """
->>>>>>> 995301a9ad8cd20d1078bf6be8d0d793bc5747b7
-    access_token: str
-    token_type: str
-    
-
+    access_token:str
+    token_type:str
 class TokenData(BaseModel):
     """
     Token data model to store user email information from the JWT token.
@@ -63,13 +48,25 @@ class UserCreateEnhanced(UserCreate):
     """
 
     @validator("email")
-    def email_format(cls, value):
-        # Permitir solo caracteres alfanuméricos, @, ., y _
+    def email_format(self, value):
+        """
+        Validates the format of an email address.
+        This method ensures that the email address contains only valid characters
+        (alphanumeric, '@', '.', and '_') and that the domain part (the part after
+        the last '.') has at least two characters.
+        Args:
+            value (str): The email address to validate.
+        Returns:
+            str: The validated email address.
+        Raises:
+            ValueError: If the email contains invalid characters or if the domain
+                        part has fewer than two characters.
+        """
         valid_chars = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@._")
         if not all(char in valid_chars for char in value):
             raise ValueError("Email contains invalid characters")
 
-        # Validar el dominio (parte después de la última '.')
+        # Validate the domain (part after the last '.')
         domain_part = value.split('.')[-1]
         if len(domain_part) < 2:
             raise ValueError("Email domain must have at least two characters after the last dot")
@@ -77,16 +74,21 @@ class UserCreateEnhanced(UserCreate):
         return value
 
     @validator("password", "role_id", pre=True, always=True)
-    def non_empty_fields(cls, v):  # Método de clase, usa 'cls' en vez de 'self'
+    def non_empty_fields(self, v):
+        """
+        Validates that the given field is not empty.
+        Args:
+            cls: The class that this method is a part of.
+            v: The value to be validated.
+        Returns:
+            The value if it is not empty.
+        Raises:
+            ValueError: If the value is None or an empty string.
+        """
         if v is None or v == "":
             raise ValueError("This field cannot be empty")
         return v
-    
-
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
-<<<<<<< HEAD
-def register(user: UserCreateEnhanced):
-=======
 def register(user: UserCreate):
     """
     Registers a new user and returns user data.
@@ -101,7 +103,6 @@ def register(user: UserCreate):
     UserRead
         The registered user's data.
     """
->>>>>>> 995301a9ad8cd20d1078bf6be8d0d793bc5747b7
     existing_user = UserService.get_user_by_email(user.email)
     if existing_user:
         raise HTTPException(
@@ -146,13 +147,4 @@ def login(form_data: OAuth2PasswordRequestFormEmail = Depends()):
     access_token = AuthService.create_access_token(
         data={"sub": user.email}  # Guarda el email en el token
     )
-<<<<<<< HEAD
-    return {
-        "status": "success",
-        "status_code": status.HTTP_200_OK,
-        "access_token": access_token,
-        "token_type": "Bearer"
-    }
-=======
     return {"access_token": access_token, "token_type": "bearer"}
->>>>>>> 995301a9ad8cd20d1078bf6be8d0d793bc5747b7
